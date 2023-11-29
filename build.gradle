@@ -40,7 +40,8 @@ dependencies {
     // Main QuPath user interface jar.
     // Automatically includes other QuPath jars as sub-dependencies.
     shadow "io.github.qupath:qupath-gui-fx:${qupathVersion}"
-
+    //Access to BioFormats extension for writing ome.tif files
+    implementation "io.github.qupath:qupath-extension-bioformats:${qupathVersion}"
     // For logging - the version comes from QuPath's version catalog at
     // https://github.com/qupath/qupath/blob/main/gradle/libs.versions.toml
     // See https://docs.gradle.org/current/userguide/platforms.html
@@ -48,6 +49,8 @@ dependencies {
 
     // If you aren't using Groovy, this can be removed
     shadow libs.bundles.groovy
+
+
 
     testImplementation "io.github.qupath:qupath-gui-fx:${qupathVersion}"
     testImplementation libs.junit
