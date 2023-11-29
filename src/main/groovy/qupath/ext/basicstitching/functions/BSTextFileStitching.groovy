@@ -1,5 +1,7 @@
 package qupath.ext.basicstitching.functions
 
+import qupath.ext.basicstitching.utilities.textfilestitching
+
 import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import qupath.lib.gui.dialogs.Dialogs
@@ -9,7 +11,6 @@ import qupath.lib.gui.scripting.QPEx
 import qupath.lib.images.writers.ome.OMEPyramidWriter
 
 //import java.nio.file.Paths
-//import qupath.lib.images.writers.ome.OMETiffWriter
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -51,7 +52,8 @@ class BSTextFileStitching {
             String matchingString = matchStringField.getText() // Assuming matchStringField is accessible
 
             // Call the function with collected data
-            stitchByFileName(folderPath, compressionType, pixelSize, downsample, matchingString)
+            textfilestitching.stitchByFileName(folderPath, compressionType, pixelSize, downsample, matchingString)
+            //stitchByFileName(folderPath, compressionType, pixelSize, downsample, matchingString)
         }
 
     }
@@ -128,29 +130,23 @@ class BSTextFileStitching {
 
         return pane
     }
-    private static OMEPyramidWriter.CompressionType getCompressionType(String selectedOption) {
-        switch (selectedOption) {
-            case "Lossy compression":
-                return OMEPyramidWriter.CompressionType.J2K_LOSSY
-            case "Lossless compression":
-                return OMEPyramidWriter.CompressionType.J2K
-            default:
-                return null // or a default value
-        }
-    }
 
 
-    private static void stitchByFileName(String folderPath, String compressionType, double pixelSize, double downsample, String matchingString) {
-        // Constructing the message to display
-        String message = "Folder Path: " + folderPath + "\n" +
-                "Compression Type: " + compressionType + "\n" +
-                "Pixel Size: " + pixelSize + "\n" +
-                "Downsample: " + downsample + "\n" +
-                "Matching String: " + matchingString
 
-        // Display the dialog with the constructed message
-        Dialogs.showConfirmDialog("Values Passed", message)
-        OMEPyramidWriter.CompressionType compresionType = getCompressionType(compressionType)
-    }
+//    private static void stitchByFileName(String folderPath, String compressionType, double pixelSize, double downsample, String matchingString) {
+//        // Constructing the message to display
+//        String message = "Folder Path: " + folderPath + "\n" +
+//                "Compression Type: " + compressionType + "\n" +
+//                "Pixel Size: " + pixelSize + "\n" +
+//                "Downsample: " + downsample + "\n" +
+//                "Matching String: " + matchingString
+//
+//        // Display the dialog with the constructed message
+//        Dialogs.showConfirmDialog("Values Passed", message)
+//        OMEPyramidWriter.CompressionType compresionType = getCompressionType(compressionType)
+//
+//
+//    }
+
 
 }
