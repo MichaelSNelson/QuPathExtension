@@ -1,6 +1,6 @@
 plugins {
   // Main gradle plugin for building a Java library
-  id 'java-library'
+  //id 'java-library'
   // Support writing the extension in Groovy (remove this if you don't want to)
   id 'groovy'
   // To create a shadow/fat jar that bundle up all dependencies
@@ -10,11 +10,11 @@ plugins {
 }
 
 // TODO: Change the module name
-ext.moduleName = 'io.github.qupath.extension.template'
+ext.moduleName = 'io.github.qupath.extension.BasicStitchingExtension'
 
 // TODO: Define the extension version & provide a short description
-version = "0.1.0-SNAPSHOT"
-description = 'A simple QuPath extension template'
+version = "0.4.4"
+description = 'A basic QuPath extension for stitching.'
 
 // TODO: Specify the QuPath version, compatible with the extension.
 // The default 'gradle.ext.qupathVersion' reads this from settings.gradle.
@@ -22,7 +22,7 @@ ext.qupathVersion = gradle.ext.qupathVersion
 
 // TODO: Specify the Java version compatible with the extension
 // Generally 11 for QuPath v0.4.3, but will be 17 for QuPath v0.5.0
-ext.qupathJavaVersion = 11
+ext.qupathJavaVersion = 17
 
 /**
  * Define dependencies.
@@ -38,7 +38,7 @@ ext.qupathJavaVersion = 11
 dependencies {
 
     // Main QuPath user interface jar.
-    // Automatically includes other QuPath jars as subdependencies.
+    // Automatically includes other QuPath jars as sub-dependencies.
     shadow "io.github.qupath:qupath-gui-fx:${qupathVersion}"
 
     // For logging - the version comes from QuPath's version catalog at
@@ -100,12 +100,12 @@ java {
  * Create javadocs for all modules/packages in one place.
  * Use -PstrictJavadoc=true to fail on error with doclint (which is rather strict).
  */
-tasks.withType(Javadoc) {
-	options.encoding = 'UTF-8'
-	def strictJavadoc = findProperty('strictJavadoc')
-	if (!strictJavadoc) {
+tasks.withType(Javadoc).configureEach {
+    options.encoding = 'UTF-8'
+    def strictJavadoc = findProperty('strictJavadoc')
+    if (!strictJavadoc) {
         options.addStringOption('Xdoclint:none', '-quiet')
-	}
+    }
 }
 
 /*
@@ -119,7 +119,7 @@ tasks.named('compileJava') {
  * Avoid 'Entry .gitkeep is a duplicate but no duplicate handling strategy has been set.'
  * when using withSourcesJar()
  */
-tasks.withType(org.gradle.jvm.tasks.Jar) {
+tasks.withType(org.gradle.jvm.tasks.Jar).configureEach {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
 
