@@ -54,8 +54,7 @@ class BasicStitchingExtension implements QuPathExtension {
 
 	private void addMenuItem(QuPathGUI qupath) {
 		def menu = qupath.getMenu("Extensions>${name}", true)
-		def fileNameStitching = new MenuItem("Stitching using coordinates in file names")
-		// TODO tooltip "Coordinates are expected to be in the format ImageName[xCoordinateInMicrons, yCoordinateInMicrons].tif"
+		def fileNameStitching = new MenuItem("Basic Stitching Extension")
 		fileNameStitching.setOnAction(e -> {
 			stitchingGUI.createGUI()
 
@@ -64,22 +63,3 @@ class BasicStitchingExtension implements QuPathExtension {
 	}
 	
 }
-//@ActionMenu("Extensions")
-//public class BSCommands {
-//
-//	@ActionMenu("BasicStitching")
-//	@ActionDescription("Launch BasicStitching dialog.")
-//	public final Action BSCommand;
-//
-//	/**
-//	 * Constructor.
-//	 *
-//	 * @param qupath
-//	 *            The QuPath GUI.
-//	 */
-//	private BSCommands(QuPathGUI qupath) {
-//		BSMainCommand bsCommand = new BSMainCommand(qupath);
-//		actionBSCommand = new Action(event -> bsCommand.run());
-//	}
-//
-//}

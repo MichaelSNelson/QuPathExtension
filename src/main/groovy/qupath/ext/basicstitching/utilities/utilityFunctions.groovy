@@ -2,15 +2,22 @@ package qupath.ext.basicstitching.utilities
 
 import org.slf4j.LoggerFactory
 import qupath.lib.gui.QuPathGUI
-import qupath.lib.gui.dialogs.Dialogs
 import qupath.lib.images.writers.ome.OMEPyramidWriter
-import org.slf4j.Logger
 import javax.imageio.ImageIO
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 
+
+
+/**
+ * Class containing utility functions used throughout the application.
+ */
 class utilityFunctions {
+
+    /**
+     * Gets the compression type for OMEPyramidWriter based on the selected option.
+     *
+     * @param selectedOption The selected compression option as a string.
+     * @return The corresponding OMEPyramidWriter.CompressionType.
+     */
     static OMEPyramidWriter.CompressionType getCompressionType(String selectedOption) {
         switch (selectedOption) {
             case "Lossy compression":
@@ -18,28 +25,44 @@ class utilityFunctions {
             case "Lossless compression":
                 return OMEPyramidWriter.CompressionType.J2K
             default:
-                return null // or a default value
+                // Consider providing a default compression type or handling this case
+                return null
         }
     }
+
+    /**
+     * Retrieves the dimensions (width and height) of a TIFF image file.
+     *
+     * @param filePath The file path of the TIFF image.
+     * @return A map containing the 'width' and 'height' of the image, or null if an error occurs.
+     */
     static Map<String, Integer> getTiffDimensions(File filePath) {
         def logger = LoggerFactory.getLogger(QuPathGUI.class)
+
+        // Check if the file exists
         if (!filePath.exists()) {
             logger.info("File not found: $filePath")
             return null
         }
 
         try {
+            // Read the image file
             def image = ImageIO.read(filePath)
             if (image == null) {
                 logger.info("ImageIO returned null for file: $filePath")
                 return null
             }
+
+            // Return the image dimensions as a map
             return [width: image.getWidth(), height: image.getHeight()]
         } catch (IOException e) {
+            // Log and handle the error
             logger.info("Error reading the image file $filePath: ${e.message}")
             return null
         }
     }
+}
+
     //TODO Move this somewhere
 //    List<Map> prepareStitching(String folderPath, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
 //        def logger = LoggerFactory.getLogger(QuPathGUI.class)
@@ -62,4 +85,4 @@ class utilityFunctions {
 //
 //        allFileRegionMaps
 //    }
-}
+//}

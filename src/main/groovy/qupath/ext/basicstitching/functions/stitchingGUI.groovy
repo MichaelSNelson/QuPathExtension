@@ -9,7 +9,8 @@ import javafx.stage.Modality
 import javafx.stage.DirectoryChooser
 import qupath.lib.gui.scripting.QPEx
 
-//import java.nio.file.Paths
+import java.awt.Desktop;
+
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,6 +32,7 @@ class stitchingGUI {
     static Label pixelSizeLabel = new Label("Pixel size, microns:");
     static Label downsampleLabel = new Label("Downsample:");
     static Label matchStringLabel = new Label("Matching string:");
+    static Hyperlink githubLink = new Hyperlink("GitHub ReadMe");
 
     // Map to hold the positions of each GUI element
     private static Map<Node, Integer> guiElementPositions = new HashMap<>();
@@ -85,7 +87,7 @@ class stitchingGUI {
         addPixelSizeComponents(pane);
         addDownsampleComponents(pane);
         addMatchStringComponents(pane);
-
+        addGitHubLinkComponent(pane); // Add the hyperlink component
         // Call once to set initial visibility of components
         updateComponentsBasedOnSelection(pane);
 
@@ -102,6 +104,18 @@ class stitchingGUI {
             logger.error("Row index not found for component: " + label);
         }
     }
+    // Method to add the GitHub link component
+    private static void addGitHubLinkComponent(GridPane pane) {
+        githubLink.setOnAction(e -> {
+            try {
+                Desktop.getDesktop().browse(new URI("https://github.com/MichaelSNelson/BasicStitching"));
+            } catch (Exception ex) {
+                logger.error("Error opening link", ex);
+            }
+        });
+        Integer rowIndex = guiElementPositions.get(githubLink); // Default to a high number if not set
+        pane.add(githubLink, 0, rowIndex, 2, 1); // Span 2 columns
+    }
 
     private static void initializePositions() {
         // Reset position counter
@@ -114,8 +128,14 @@ class stitchingGUI {
         guiElementPositions.put(pixelSizeLabel, currentPosition++);
         guiElementPositions.put(downsampleLabel, currentPosition++);
         guiElementPositions.put(matchStringLabel, currentPosition++);
+        guiElementPositions.put(githubLink, currentPosition++); // Assign position to hyperlink
         // Add more components as needed
     }
+
+
+
+
+
     // Method to add stitching grid components
     private static void addStitchingGridComponents(GridPane pane) {
         stitchingGridBox.getItems().clear() // Clear existing items before adding new ones
