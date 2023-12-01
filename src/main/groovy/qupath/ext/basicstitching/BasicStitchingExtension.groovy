@@ -1,14 +1,9 @@
 package qupath.ext.basicstitching;
 
 import javafx.scene.control.MenuItem;
-import qupath.ext.basicstitching.functions.BSTextFileStitching
+import qupath.ext.basicstitching.functions.stitchingGUI
 import qupath.lib.common.Version;
-import qupath.lib.gui.QuPathGUI;
-import qupath.lib.gui.ActionTools;
-import qupath.lib.gui.ActionTools.ActionDescription;
-import qupath.lib.gui.ActionTools.ActionMenu;
-import org.controlsfx.control.action.Action;
-
+import qupath.lib.gui.QuPathGUI
 import qupath.lib.gui.extensions.QuPathExtension;
 
 
@@ -62,7 +57,7 @@ class BasicStitchingExtension implements QuPathExtension {
 		def fileNameStitching = new MenuItem("Stitching using coordinates in file names")
 		// TODO tooltip "Coordinates are expected to be in the format ImageName[xCoordinateInMicrons, yCoordinateInMicrons].tif"
 		fileNameStitching.setOnAction(e -> {
-			BSTextFileStitching.createGUI()
+			stitchingGUI.createGUI()
 
 		})
 		menu.getItems() << fileNameStitching
