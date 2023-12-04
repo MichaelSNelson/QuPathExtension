@@ -20,13 +20,13 @@ class utilityFunctions {
      */
     static OMEPyramidWriter.CompressionType getCompressionType(String selectedOption) {
         switch (selectedOption) {
-            case "Lossy compression":
+            case "Lossy compression JPEG2000":
                 return OMEPyramidWriter.CompressionType.J2K_LOSSY
-            case "Lossless compression":
+            case "Lossless compression JPEG2000":
                 return OMEPyramidWriter.CompressionType.J2K
             default:
-                // Consider providing a default compression type or handling this case
-                return null
+                // Default to lossless J2K if something goes wrong
+                return OMEPyramidWriter.CompressionType.J2K
         }
     }
 

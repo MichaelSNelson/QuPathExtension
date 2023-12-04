@@ -21,6 +21,9 @@ import javax.imageio.ImageIO
 
 import org.slf4j.LoggerFactory;
 
+//TODO Is there a way to apply the downsample when accessing the image regions so the full res image region doesn't need to be stored in memory?
+// Maybe downsample after acquiring the region as a second step?
+
 // Interface for stitching strategies
 interface StitchingStrategy {
     List<Map> prepareStitching(String folderPath, double pixelSizeInMicrons, double baseDownsample, String matchingString)
@@ -86,7 +89,7 @@ class FileNameStitchingStrategy implements StitchingStrategy {
         files.each { file ->
             def region = parseRegionFromOffsetTileConfig(file as File, tileConfig as List<Map>, minimumXY, pixelSizeInMicrons)
             if (region) {
-                fileRegionMaps << [file: file, region: region]
+                fileRegionMaps << [file: file, region: region, subdirName: dir.getFileName().toString()]
             }
         }
 
@@ -177,7 +180,7 @@ class TileConfigurationTxtStrategy implements StitchingStrategy {
             ImageRegion region = parseRegionFromTileConfig(file as File, tileConfig as List<Map>)
             if (region) {
                 logger.info("Processing file: ${file.path}")
-                fileRegionMaps << [file: file, region: region]
+                fileRegionMaps << [file: file, region: region, subdirName: dir.getFileName().toString()]
             }
         }
         // Perform stitching for this subdir here, or return fileRegionMaps to be stitched later
@@ -278,7 +281,7 @@ class VectraMetadataStrategy implements StitchingStrategy {
             ImageRegion region = parseRegion(file as File)
             if (region) {
                 //logger.info("Processing file: ${file.path}")
-                fileRegionMaps << [file: file, region: region]
+                fileRegionMaps << [file: file, region: region, subdirName: dir.getFileName().toString()]
             }
         }
 
@@ -408,6 +411,8 @@ class stitchingImplementations {
                 Dialogs.showWarningNotification("Warning", "No valid folders found matching the criteria.")
                 return // Exit the method to avoid further processing
             }
+
+            def subdirName
             fileRegionPairs.each { pair ->
                 if (pair == null) {
                     logger.warn("Encountered a null pair in fileRegionPairs")
@@ -415,6 +420,7 @@ class stitchingImplementations {
                 }
                 def file = pair['file'] as File
                 def region = pair['region'] as ImageRegion
+                subdirName = pair['subdirName'] as String // Extract subdirName from the pair
 
                 if (file == null) {
                     logger.warn("File is null in pair: $pair")
@@ -435,7 +441,7 @@ class stitchingImplementations {
             server = ImageServers.pyramidalize(server)
 
             long startTime = System.currentTimeMillis()
-            def filename = Paths.get(folderPath).getFileName().toString()
+            def filename = Paths?.get(subdirName)?.getFileName()?.toString()
             def outputPath = baseDownsample == 1 ?
                     Paths.get(folderPath).resolve(filename + '.ome.tif') :
                     Paths.get(folderPath).resolve(filename + '_' + (int) baseDownsample + 'x_downsample.ome.tif')

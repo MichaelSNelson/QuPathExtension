@@ -31,7 +31,7 @@ class stitchingGUI {
     static Label compressionLabel = new Label("Compression type:");
     static Label pixelSizeLabel = new Label("Pixel size, microns:");
     static Label downsampleLabel = new Label("Downsample:");
-    static Label matchStringLabel = new Label("Matching string:");
+    static Label matchStringLabel = new Label("Stitch sub-folders with text string:");
     static Hyperlink githubLink = new Hyperlink("GitHub ReadMe");
 
     // Map to hold the positions of each GUI element
@@ -83,10 +83,11 @@ class stitchingGUI {
         // Add components to the grid pane
         addStitchingGridComponents(pane);
         addFolderSelectionComponents(pane);
+        addMatchStringComponents(pane);
         addCompressionComponents(pane);
         addPixelSizeComponents(pane);
         addDownsampleComponents(pane);
-        addMatchStringComponents(pane);
+
         addGitHubLinkComponent(pane); // Add the hyperlink component
         // Call once to set initial visibility of components
         updateComponentsBasedOnSelection(pane);
@@ -131,9 +132,6 @@ class stitchingGUI {
         guiElementPositions.put(githubLink, currentPosition++); // Assign position to hyperlink
         // Add more components as needed
     }
-
-
-
 
 
     // Method to add stitching grid components
@@ -198,7 +196,7 @@ class stitchingGUI {
     // Method to add compression components
     private static void addCompressionComponents(GridPane pane) {
         compressionBox.getItems().clear()
-        compressionBox.getItems().addAll("Lossy compression", "Lossless compression");
+        compressionBox.getItems().addAll("Lossy compression JPEG2000", "Lossless compression JPEG2000");
         compressionBox.setValue("Lossless compression"); // Set default value
         // Create a Tooltip
         Tooltip compressionTooltip = new Tooltip("Select the type of image compression.");
@@ -217,6 +215,13 @@ class stitchingGUI {
 
     // Method to add downsample components
     private static void addDownsampleComponents(GridPane pane) {
+        // Create a Tooltip
+        Tooltip downsampleTooltip = new Tooltip("The amount by which the highest resolution plane will be initially downsampled.");
+
+        // Set the Tooltip for both the label and the control
+        compressionLabel.setTooltip(downsampleTooltip);
+        compressionBox.setTooltip(downsampleTooltip);
+
         addToGrid(pane, downsampleLabel as Node, downsampleField as Node);
     }
 
