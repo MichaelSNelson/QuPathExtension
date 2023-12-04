@@ -52,20 +52,40 @@ interface StitchingStrategy {
 //    }
 //}
 // Concrete strategy for stitching based on file names
+
+/**
+ * Strategy for stitching images based on file names.
+ * This class implements the {@link StitchingStrategy} interface and provides a specific
+ * algorithm for stitching based on the naming convention of image files.
+ */
 class FileNameStitchingStrategy implements StitchingStrategy {
+
+    /**
+     * Prepares stitching by processing each subdirectory within the specified root directory.
+     * This method iterates over each subdirectory that matches the given criteria and
+     * aggregates file-region mapping information for stitching.
+     *
+     * @param folderPath The path to the root directory containing image files.
+     * @param pixelSizeInMicrons The pixel size in microns, used for calculating image regions.
+     * @param baseDownsample The base downsample value for the stitching process.
+     * @param matchingString A string to match for selecting relevant subdirectories.
+     * @return A list of maps, each map containing file, region, and subdirName information for stitching.
+     */
     @Override
     List<Map> prepareStitching(String folderPath, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
         Path rootdir = Paths.get(folderPath)
-        List<Map> allFileRegionMaps = [] // This will store the file-region maps for all subdirectories
+        List<Map> allFileRegionMaps = []
 
-
+        // Iterate over each subdirectory in the root directory
         Files.newDirectoryStream(rootdir).each { path ->
             if (Files.isDirectory(path) && path.fileName.toString().contains(matchingString)) {
+                // Process each subdirectory and collect file-region mappings
                 def fileRegionMaps = processSubDirectory(path, pixelSizeInMicrons, baseDownsample)
                 allFileRegionMaps += fileRegionMaps
             }
         }
 
+        // Check if any valid file-region mappings were found
         if (allFileRegionMaps.isEmpty()) {
             Dialogs.showWarningNotification("Warning", "No valid tile configurations found in any subdirectory.")
             return
@@ -73,28 +93,57 @@ class FileNameStitchingStrategy implements StitchingStrategy {
 
         allFileRegionMaps
     }
+
+    /**
+     * Processes a single subdirectory to generate file-region mappings for stitching.
+     * This method collects all TIFF files in the directory, builds tile configurations,
+     * and creates a mapping of each file to its corresponding image region.
+     *
+     * @param dir The path to the subdirectory to be processed.
+     * @param pixelSizeInMicrons The pixel size in microns for calculating image regions.
+     * @param baseDownsample The base downsample value for the stitching process.
+     * @return A list of maps, each map containing file, region, and subdirName for stitching.
+     */
     private static List<Map> processSubDirectory(Path dir, double pixelSizeInMicrons, double baseDownsample) {
         def logger = LoggerFactory.getLogger(QuPathGUI.class)
         logger.info("Processing slide in folder $dir")
 
+        // Collect all TIFF files in the directory
         def files = []
         Files.newDirectoryStream(dir, "*.tif*").each { path ->
             files << path.toFile()
         }
 
+        // Build tile configurations from the collected files
         def tileConfigOutput = buildTileConfigWithMinCoordinates(dir)
         def tileConfig = tileConfigOutput[0]
         def minimumXY = tileConfigOutput[1]
+
+        // Create file-region mappings for each file
         List<Map> fileRegionMaps = []
         files.each { file ->
             def region = parseRegionFromOffsetTileConfig(file as File, tileConfig as List<Map>, minimumXY, pixelSizeInMicrons)
             if (region) {
+                // Add file, region, and subdir name to the mappings
                 fileRegionMaps << [file: file, region: region, subdirName: dir.getFileName().toString()]
             }
         }
 
         return fileRegionMaps
     }
+
+/**
+ * Parses an image region from offset tile configuration.
+ * This method calculates the region of an image file based on its position within a larger stitched image.
+ *
+ * @param file The image file for which to parse the region.
+ * @param tileConfig A list of maps containing tile configurations, each with image name and its coordinates.
+ * @param minimumXY The minimum x and y coordinates among all tiles, used for offset calculations.
+ * @param pixelSizeInMicrons The size of a pixel in microns, used for scaling coordinates.
+ * @param z The z-plane index of the image (default is 0).
+ * @param t The timepoint index of the image (default is 0).
+ * @return An ImageRegion object representing the specified region of the image or null if not found.
+ */
     static ImageRegion parseRegionFromOffsetTileConfig(File file, List<Map> tileConfig, minimumXY, double pixelSizeInMicrons, int z = 0, int t = 0) {
         String imageName = file.getName()
         def config = tileConfig.find { it.imageName == imageName }
@@ -116,6 +165,15 @@ class FileNameStitchingStrategy implements StitchingStrategy {
             return null
         }
     }
+
+/**
+ * Builds tile configurations with minimum coordinates for a given directory.
+ * This method scans a directory for image files and extracts their coordinates from the file names.
+ * It then calculates the minimum X and Y coordinates among all images.
+ *
+ * @param dir The directory path containing the image files.
+ * @return A list containing two elements: a list of image configurations and an array [minX, minY].
+ */
     static def buildTileConfigWithMinCoordinates(Path dir) {
         def images = []
         def logger = LoggerFactory.getLogger(QuPathGUI.class)
@@ -136,44 +194,77 @@ class FileNameStitchingStrategy implements StitchingStrategy {
 }
 
 
+/**
+ * Strategy for stitching images based on tile configurations specified in a TileConfiguration.txt file.
+ * This class implements the {@link StitchingStrategy} interface, providing an algorithm
+ * for processing and stitching images based on their defined tile configurations.
+ */
 class TileConfigurationTxtStrategy implements StitchingStrategy {
+
+    /**
+     * Prepares stitching by processing each subdirectory within the specified root directory.
+     * This method iterates over each subdirectory that matches the given criteria and
+     * aggregates file-region mapping information for stitching.
+     *
+     * @param folderPath The path to the root directory containing image files.
+     * @param pixelSizeInMicrons The pixel size in microns, used for calculating image regions.
+     * @param baseDownsample The base downsample value for the stitching process.
+     * @param matchingString A string to match for selecting relevant subdirectories.
+     * @return A list of maps, each map containing file, region, and subdirName information for stitching.
+     */
     @Override
     List<Map> prepareStitching(String folderPath, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
-
         Path rootdir = Paths.get(folderPath)
-        List<Map> allFileRegionMaps = [] // This will store the file-region maps for all subdirectories
+        List<Map> allFileRegionMaps = []
 
-
+        // Iterate over each subdirectory in the root directory
         Files.newDirectoryStream(rootdir).each { path ->
             if (Files.isDirectory(path) && path.fileName.toString().contains(matchingString)) {
+                // Process each subdirectory and collect file-region mappings
                 def fileRegionMaps = processSubDirectory(path, pixelSizeInMicrons, baseDownsample)
                 allFileRegionMaps += fileRegionMaps
             }
         }
 
+        // Check if any valid file-region mappings were found
         if (allFileRegionMaps.isEmpty()) {
             Dialogs.showWarningNotification("Warning", "No valid tile configurations found in any subdirectory.")
-            return
+            return []
         }
 
         allFileRegionMaps
     }
-    private static List<Map> processSubDirectory(Path dir, double pixelSizeInMicrons, double baseDownsample) {
 
+    /**
+     * Processes a single subdirectory to generate file-region mappings for stitching.
+     * This method reads the TileConfiguration.txt file in the directory (if present),
+     * collects all TIFF files, and creates a mapping of each file to its corresponding image region.
+     *
+     * @param dir The path to the subdirectory to be processed.
+     * @param pixelSizeInMicrons The pixel size in microns for calculating image regions.
+     * @param baseDownsample The base downsample value for the stitching process.
+     * @return A list of maps, each map containing file, region, and subdirName for stitching.
+     */
+    private static List<Map> processSubDirectory(Path dir, double pixelSizeInMicrons, double baseDownsample) {
+        def logger = LoggerFactory.getLogger(QuPathGUI.class)
         logger.info("Processing slide in folder $dir")
-        // Check for TileConfiguration.txt
+
+        // Check for the existence of TileConfiguration.txt in the directory
         Path tileConfigPath = dir.resolve("TileConfiguration.txt")
         if (!Files.exists(tileConfigPath)) {
             logger.info("Skipping folder as TileConfiguration.txt is missing: $dir")
-            return
+            return []
         }
         def tileConfig = parseTileConfiguration(tileConfigPath.toString())
         logger.info('completed parseTileConfiguration')
+
+        // Collect all TIFF files in the directory
         List<File> files = []
         Files.newDirectoryStream(dir, "*.tif*").each { path ->
             files << path.toFile()
         }
 
+        // Create file-region mappings for each file
         List<Map> fileRegionMaps = []
         files.each { File file ->
             logger.info("parsing region from file $file")
@@ -183,10 +274,9 @@ class TileConfigurationTxtStrategy implements StitchingStrategy {
                 fileRegionMaps << [file: file, region: region, subdirName: dir.getFileName().toString()]
             }
         }
-        // Perform stitching for this subdir here, or return fileRegionMaps to be stitched later
+
         return fileRegionMaps
     }
-
     /**
      * Parses the 'TileConfiguration.txt' file to extract image names and their coordinates.
      * The function reads each line of the file, ignoring comments and blank lines.
@@ -244,43 +334,73 @@ class TileConfigurationTxtStrategy implements StitchingStrategy {
 }
 
 
+/**
+ * Strategy for stitching images based on Vectra metadata.
+ * This class implements the {@link StitchingStrategy} interface, providing an algorithm
+ * for processing and stitching images based on metadata from Vectra imaging systems.
+ */
 class VectraMetadataStrategy implements StitchingStrategy {
+
+    /**
+     * Prepares stitching by processing each subdirectory within the specified root directory.
+     * This method iterates over each subdirectory that matches the given criteria and
+     * aggregates file-region mapping information for stitching.
+     *
+     * @param folderPath The path to the root directory containing image files.
+     * @param pixelSizeInMicrons The pixel size in microns, used for calculating image regions.
+     * @param baseDownsample The base downsample value for the stitching process.
+     * @param matchingString A string to match for selecting relevant subdirectories.
+     * @return A list of maps, each map containing file, region, and subdirName information for stitching.
+     */
     @Override
     List<Map> prepareStitching(String folderPath, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
         Path rootdir = Paths.get(folderPath)
-        List<Map> allFileRegionMaps = [] // This will store the file-region maps for all subdirectories
+        List<Map> allFileRegionMaps = []
 
-
+        // Iterate over each subdirectory in the root directory
         Files.newDirectoryStream(rootdir).each { path ->
             if (Files.isDirectory(path) && path.fileName.toString().contains(matchingString)) {
+                // Process each subdirectory and collect file-region mappings
                 def fileRegionMaps = processSubDirectory(path, pixelSizeInMicrons, baseDownsample)
                 allFileRegionMaps += fileRegionMaps
             }
         }
 
+        // Check if any valid file-region mappings were found
         if (allFileRegionMaps.isEmpty()) {
             Dialogs.showWarningNotification("Warning", "No valid tile configurations found in any subdirectory.")
-            return
+            return []
         }
 
         allFileRegionMaps
     }
 
+    /**
+     * Processes a single subdirectory to generate file-region mappings for stitching.
+     * This method collects all TIFF files in the directory and creates a mapping of each file
+     * to its corresponding image region based on Vectra metadata.
+     *
+     * @param dir The path to the subdirectory to be processed.
+     * @param pixelSizeInMicrons The pixel size in microns for calculating image regions.
+     * @param baseDownsample The base downsample value for the stitching process.
+     * @return A list of maps, each map containing file, region, and subdirName for stitching.
+     */
     private static List<Map> processSubDirectory(Path dir, double pixelSizeInMicrons, double baseDownsample) {
+        def logger = LoggerFactory.getLogger(QuPathGUI.class)
         logger.info("Processing slide in folder $dir")
-        // Check for TileConfiguration.txt
 
-
+        // Collect all TIFF files in the directory
         List<File> files = []
         Files.newDirectoryStream(dir, "*.tif*").each { path ->
             files << path.toFile()
         }
         logger.info('Parsing regions from ' + files.size() + ' files...')
+
+        // Create file-region mappings for each file
         List<Map> fileRegionMaps = []
-        files.each { file ->
+        files.each { File file ->
             ImageRegion region = parseRegion(file as File)
             if (region) {
-                //logger.info("Processing file: ${file.path}")
                 fileRegionMaps << [file: file, region: region, subdirName: dir.getFileName().toString()]
             }
         }
@@ -288,6 +408,15 @@ class VectraMetadataStrategy implements StitchingStrategy {
         return fileRegionMaps
     }
 
+    /**
+     * Parses the image region from a given file based on Vectra metadata.
+     * This method checks if the file is a TIFF and then parses the region from the TIFF file.
+     *
+     * @param file The image file for which to parse the region.
+     * @param z The z-plane index of the image (default is 0).
+     * @param t The timepoint index of the image (default is 0).
+     * @return An ImageRegion object representing the specified region of the image, or null if not found.
+     */
     static ImageRegion parseRegion(File file, int z = 0, int t = 0) {
         if (checkTIFF(file)) {
             try {
@@ -299,42 +428,51 @@ class VectraMetadataStrategy implements StitchingStrategy {
     }
 
     /**
-     * Check for TIFF 'magic number'.
-     * @param file
-     * @return
+     * Checks if the provided file is a TIFF image by examining its 'magic number'.
+     * TIFF files typically start with a specific byte order indicator (0x4949 for little-endian
+     * or 0x4d4d for big-endian), followed by a fixed number (42 or 43).
+     *
+     * @param file The file to be checked.
+     * @return True if the file is a TIFF image, false otherwise.
      */
     static boolean checkTIFF(File file) {
         file.withInputStream {
             def bytes = it.readNBytes(4)
             short byteOrder = toShort(bytes[0], bytes[1])
+
+            // Interpret the next two bytes based on the byte order
             int val
-            if (byteOrder == 0x4949) {
-                // Little-endian
+            if (byteOrder == 0x4949) { // Little-endian
                 val = toShort(bytes[3], bytes[2])
-            } else if (byteOrder == 0x4d4d) {
+            } else if (byteOrder == 0x4d4d) { // Big-endian
                 val = toShort(bytes[2], bytes[3])
             } else
                 return false
-            return val == 42 || val == 43
+
+            return val == 42 || val == 43 // TIFF magic number
         }
     }
 
     /**
-     * Combine two bytes to create a short, in the given order
-     * @param b1
-     * @param b2
-     * @return
+     * Converts two bytes into a short, in the specified byte order.
+     *
+     * @param b1 The first byte.
+     * @param b2 The second byte.
+     * @return The combined short value.
      */
     static short toShort(byte b1, byte b2) {
         return (b1 << 8) + (b2 << 0)
     }
 
     /**
-     * Parse an ImageRegion from a TIFF image, using the metadata.
-     * @param file image file
-     * @param z index of z plane
-     * @param t index of timepoint
-     * @return
+     * Parses the image region from a TIFF file using metadata information.
+     * Reads TIFF metadata to determine the image's physical position and dimensions,
+     * then calculates and returns the corresponding ImageRegion object.
+     *
+     * @param file The TIFF image file to parse.
+     * @param z The z-plane index of the image (default is 0).
+     * @param t The timepoint index of the image (default is 0).
+     * @return An ImageRegion object representing the specified region of the image.
      */
     static ImageRegion parseRegionFromTIFF(File file, int z = 0, int t = 0) {
         int x, y, width, height
@@ -344,15 +482,17 @@ class VectraMetadataStrategy implements StitchingStrategy {
             def metadata = reader.getImageMetadata(0)
             def tiffDir = TIFFDirectory.createFromMetadata(metadata)
 
+            // Extract resolution and position values from the metadata
             double xRes = getRational(tiffDir, BaselineTIFFTagSet.TAG_X_RESOLUTION)
             double yRes = getRational(tiffDir, BaselineTIFFTagSet.TAG_Y_RESOLUTION)
-
             double xPos = getRational(tiffDir, BaselineTIFFTagSet.TAG_X_POSITION)
             double yPos = getRational(tiffDir, BaselineTIFFTagSet.TAG_Y_POSITION)
 
+            // Extract image dimensions from the metadata
             width = tiffDir.getTIFFField(BaselineTIFFTagSet.TAG_IMAGE_WIDTH).getAsLong(0) as int
             height = tiffDir.getTIFFField(BaselineTIFFTagSet.TAG_IMAGE_LENGTH).getAsLong(0) as int
 
+            // Calculate the x and y coordinates in the final stitched image
             x = Math.round(xRes * xPos) as int
             y = Math.round(yRes * yPos) as int
         }
@@ -360,63 +500,85 @@ class VectraMetadataStrategy implements StitchingStrategy {
     }
 
     /**
-     * Helper for parsing rational from TIFF metadata.
-     * @param tiffDir
-     * @param tag
-     * @return
+     * Extracts a rational number from TIFF metadata based on the specified tag.
+     * The rational number is represented as a fraction (numerator/denominator).
+     *
+     * @param tiffDir The TIFFDirectory object containing the metadata.
+     * @param tag The metadata tag to extract the rational number from.
+     * @return The rational number as a double.
      */
     static double getRational(TIFFDirectory tiffDir, int tag) {
-        long[] rational = tiffDir.getTIFFField(tag).getAsRational(0);
-        return rational[0] / (double)rational[1];
+        long[] rational = tiffDir.getTIFFField(tag).getAsRational(0)
+        return rational[0] / (double)rational[1]
     }
 }
 
 
+
+/**
+ * Class responsible for managing stitching strategies and executing the stitching process.
+ * This class sets the appropriate stitching strategy based on the given type and coordinates the stitching process.
+ */
 class stitchingImplementations {
     private static StitchingStrategy strategy
 
+    /**
+     * Sets the stitching strategy to be used.
+     *
+     * @param strategy The stitching strategy to be set.
+     */
     static void setStitchingStrategy(StitchingStrategy strategy) {
         stitchingImplementations.strategy = strategy
     }
 
+    /**
+     * Core method to perform stitching based on the specified stitching type and other parameters.
+     * This method determines the stitching strategy, prepares stitching, and then performs the stitching process.
+     *
+     * @param stitchingType The type of stitching to be performed.
+     * @param folderPath The path to the folder containing images to be stitched.
+     * @param compressionType The type of compression to be used in the stitching output.
+     * @param pixelSizeInMicrons The size of a pixel in microns.
+     * @param baseDownsample The base downsample value for the stitching process.
+     * @param matchingString A string to match for selecting relevant subdirectories or files.
+     */
     static void stitchCore(String stitchingType, String folderPath, String compressionType, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
         def logger = LoggerFactory.getLogger(QuPathGUI.class)
+        // Determine the stitching strategy based on the provided type
         switch(stitchingType) {
             case "Filename[x,y] with coordinates in microns":
                 setStitchingStrategy(new FileNameStitchingStrategy())
                 break
-
             case "Vectra tiles with metadata":
                 setStitchingStrategy(new VectraMetadataStrategy())
                 break
-
             case "Coordinates in TileCoordinates.txt file":
                 setStitchingStrategy(new TileConfigurationTxtStrategy())
                 break
-
             default:
-                // Handle unexpected stitchingType
                 Dialogs.showWarningNotification("Warning", "Error with choosing a stitching method, code here should not be reached in stitchingImplementations.groovy")
-                return // Safely exit the method
-        // Other cases for different stitching types
+                return // Safely exit the method if the stitching type is not recognized
         }
 
+        // Proceed with the stitching process if a valid strategy is set
         if(strategy) {
-
+            // Prepare stitching by processing the folder with the selected strategy
             def fileRegionPairs = strategy.prepareStitching(folderPath, pixelSizeInMicrons, baseDownsample, matchingString)
             OMEPyramidWriter.CompressionType compression = utilityFunctions.getCompressionType(compressionType)
             def builder = new SparseImageServer.Builder()
 
+            // Check if valid file-region pairs were obtained
             if (fileRegionPairs == null || fileRegionPairs.isEmpty()) {
                 Dialogs.showWarningNotification("Warning", "No valid folders found matching the criteria.")
-                return // Exit the method to avoid further processing
+                return // Exit the method if no valid file-region pairs are found
             }
 
             def subdirName
+            // Process each file-region pair to build the image server for stitching
             fileRegionPairs.each { pair ->
                 if (pair == null) {
                     logger.warn("Encountered a null pair in fileRegionPairs")
-                    return // Skip this iteration
+                    return // Skip this iteration if the pair is null
                 }
                 def file = pair['file'] as File
                 def region = pair['region'] as ImageRegion
@@ -424,24 +586,26 @@ class stitchingImplementations {
 
                 if (file == null) {
                     logger.warn("File is null in pair: $pair")
-                    return // Skip this iteration
+                    return // Skip this iteration if the file is null
                 }
 
                 if (region == null) {
                     logger.warn("Region is null in pair: $pair")
-                    return // Skip this iteration
+                    return // Skip this iteration if the region is null
                 }
 
-                //logger.info("Processing file: ${file.path}, region: $region")
+                // Add the region to the image server builder
                 def serverBuilder = ImageServerProvider.getPreferredUriImageSupport(BufferedImage.class, file.toURI().toString()).getBuilders().get(0)
                 builder.jsonRegion(region, 1.0, serverBuilder)
             }
 
+            // Build and pyramidalize the server for the final stitched image
             def server = builder.build()
             server = ImageServers.pyramidalize(server)
 
+            // Write the final stitched image
             long startTime = System.currentTimeMillis()
-            def filename = Paths?.get(subdirName)?.getFileName()?.toString()
+            def filename = subdirName ? subdirName : Paths.get(folderPath).getFileName().toString()
             def outputPath = baseDownsample == 1 ?
                     Paths.get(folderPath).resolve(filename + '.ome.tif') :
                     Paths.get(folderPath).resolve(filename + '_' + (int) baseDownsample + 'x_downsample.ome.tif')
@@ -465,10 +629,5 @@ class stitchingImplementations {
             println("No valid stitching strategy set.")
         }
     }
-
-
-
-
-
-
 }
+
