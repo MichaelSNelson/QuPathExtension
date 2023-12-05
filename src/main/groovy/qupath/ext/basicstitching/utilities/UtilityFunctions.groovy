@@ -10,7 +10,7 @@ import javax.imageio.ImageIO
 /**
  * Class containing utility functions used throughout the application.
  */
-class utilityFunctions {
+class UtilityFunctions {
 
     /**
      * Gets the compression type for OMEPyramidWriter based on the selected option.

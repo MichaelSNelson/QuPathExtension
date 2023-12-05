@@ -19,9 +19,9 @@ import java.awt.Desktop;
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class stitchingGUI {
+class StitchingGUI {
 
-    private static final Logger logger = LoggerFactory.getLogger(stitchingGUI.class);
+    private static final Logger logger = LoggerFactory.getLogger(StitchingGUI.class);
     static TextField folderField = new TextField();
     static ComboBox<String> compressionBox = new ComboBox<>();
     static TextField pixelSizeField = new TextField("0.4988466");

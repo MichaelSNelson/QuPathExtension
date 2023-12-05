@@ -11,7 +11,7 @@ import qupath.lib.gui.QuPathGUI
 
 import java.awt.image.BufferedImage
 import static qupath.lib.gui.scripting.QPEx.*
-import qupath.ext.basicstitching.utilities.utilityFunctions
+import qupath.ext.basicstitching.utilities.UtilityFunctions
 import java.nio.file.Path
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -152,7 +152,7 @@ class FileNameStitchingStrategy implements StitchingStrategy {
         if (config) {
             int x = (config.x - minimumXY[0]) / pixelSizeInMicrons as int
             int y = (config.y - minimumXY[1]) / pixelSizeInMicrons as int
-            def dimensions = utilityFunctions.getTiffDimensions(file)
+            def dimensions = UtilityFunctions.getTiffDimensions(file)
             if (dimensions == null) {
                 logger.info("Could not retrieve dimensions for image $imageName")
                 return null
@@ -317,7 +317,7 @@ class TileConfigurationTxtStrategy implements StitchingStrategy {
         if (config) {
             int x = config.x as int
             int y = config.y as int
-            def dimensions = utilityFunctions.getTiffDimensions(file)
+            def dimensions = UtilityFunctions.getTiffDimensions(file)
             if (dimensions == null) {
                 logger.info(  "Could not retrieve dimensions for image $imageName")
                 return null
@@ -564,7 +564,7 @@ class stitchingImplementations {
         if(strategy) {
             // Prepare stitching by processing the folder with the selected strategy
             def fileRegionPairs = strategy.prepareStitching(folderPath, pixelSizeInMicrons, baseDownsample, matchingString)
-            OMEPyramidWriter.CompressionType compression = utilityFunctions.getCompressionType(compressionType)
+            OMEPyramidWriter.CompressionType compression = UtilityFunctions.getCompressionType(compressionType)
             def builder = new SparseImageServer.Builder()
 
             // Check if valid file-region pairs were obtained

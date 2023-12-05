@@ -1,7 +1,7 @@
 package qupath.ext.basicstitching;
 
 import javafx.scene.control.MenuItem;
-import qupath.ext.basicstitching.functions.stitchingGUI
+import qupath.ext.basicstitching.functions.StitchingGUI
 import qupath.lib.common.Version;
 import qupath.lib.gui.QuPathGUI
 import qupath.lib.gui.extensions.QuPathExtension;
@@ -56,7 +56,7 @@ class BasicStitchingExtension implements QuPathExtension {
 		def menu = qupath.getMenu("Extensions>${name}", true)
 		def fileNameStitching = new MenuItem("Basic Stitching Extension")
 		fileNameStitching.setOnAction(e -> {
-			stitchingGUI.createGUI()
+			StitchingGUI.createGUI()
 
 		})
 		menu.getItems() << fileNameStitching
