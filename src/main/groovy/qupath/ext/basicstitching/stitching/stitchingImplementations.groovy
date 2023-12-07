@@ -256,6 +256,7 @@ class TileConfigurationTxtStrategy implements StitchingStrategy {
             return []
         }
         def tileConfig = parseTileConfiguration(tileConfigPath.toString())
+
         logger.info('completed parseTileConfiguration')
 
         // Collect all TIFF files in the directory
@@ -263,7 +264,18 @@ class TileConfigurationTxtStrategy implements StitchingStrategy {
         Files.newDirectoryStream(dir, "*.tif*").each { path ->
             files << path.toFile()
         }
+        // Extract file names from tileConfig
+        Set<String> tileConfigFileNames = tileConfig.collect { it.imageName }
 
+        // Extract file names from the directory
+        Set<String> directoryFileNames = files.collect { it.name }
+
+        // Check if tileConfig file names match with the actual file names in the directory
+        if (!tileConfigFileNames.equals(directoryFileNames)) {
+            logger.warn("Mismatch between tile configuration file names and actual file names in directory: $dir")
+
+            return [] // Optionally skip processing if there is a mismatch
+        }
         // Create file-region mappings for each file
         List<Map> fileRegionMaps = []
         files.each { File file ->
@@ -287,7 +299,7 @@ class TileConfigurationTxtStrategy implements StitchingStrategy {
      */
     static def parseTileConfiguration(String filePath) {
         def lines = Files.readAllLines(Paths.get(filePath))
-        def images = []
+        def imageCoordinates = []
 
         lines.each { line ->
             if (!line.startsWith("#") && !line.trim().isEmpty()) {
@@ -295,12 +307,12 @@ class TileConfigurationTxtStrategy implements StitchingStrategy {
                 if (parts.length >= 3) {
                     def imageName = parts[0].trim()
                     def coordinates = parts[2].trim().replaceAll("[()]", "").split(",")
-                    images << [imageName: imageName, x: Double.parseDouble(coordinates[0]), y: Double.parseDouble(coordinates[1])]
+                    imageCoordinates << [imageName: imageName, x: Double.parseDouble(coordinates[0]), y: Double.parseDouble(coordinates[1])]
                 }
             }
         }
 
-        return images
+        return imageCoordinates
     }
     /**
      * Parse an ImageRegion from the TileConfiguration.txt data and TIFF file dimensions.

@@ -215,7 +215,7 @@ class StitchingGUI {
         );
 
         // Set the default value for the combo box
-        stitchingGridBox.setValue("Coordinates in TileCoordinates.txt file");
+        stitchingGridBox.setValue("Coordinates in TileConfiguration.txt file");
 
         // Define an action to be performed when a new item is selected in the combo box
         // This action updates the visibility of other components based on the selection
