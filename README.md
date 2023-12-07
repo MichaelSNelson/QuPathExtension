@@ -1,5 +1,5 @@
 # QuPath extension for stitching 
-## (Download [here](https://drive.google.com/file/d/1OKdCWk8ehwh4YyxGvcwFHJUzMItT0uBi/view?usp=sharing))
+## Download [here](https://drive.google.com/file/d/1GspON9cjvjaHbjR2W6rgC6TBBNRuB_pY/view?usp=sharing)
 
 This repo contains a basic extension for [QuPath](https://qupath.github.io) which can perform some of the same basic stitching functions as
 Grid/Collection stitching in Fiji. Namely, it will be able to either use the TileConfiguration.txt file within a folder
