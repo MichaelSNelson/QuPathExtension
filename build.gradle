@@ -12,8 +12,8 @@ plugins {
   id 'maven-publish'
 }
 
-// TODO: Change the module name
-ext.moduleName = 'io.github.qupath.extension.BasicStitchingExtension'
+// Change the module name
+ext.moduleName = 'qupath.extension.BasicStitchingExtension'
 group = 'qupath.ext.basicstitching'
 // TODO: Define the extension version & provide a short description
 version = "0.1.0"
@@ -141,7 +141,7 @@ tasks.named('test') {
 // within QuPath itself (which is useful during development).
 repositories {
     // Add this if you need access to dependencies only installed locally
-    //  mavenLocal()
+    // mavenLocal()
 
     mavenCentral()
 

@@ -8,10 +8,10 @@ pluginManagement {
     }
 }
 
-// TODO: Name your QuPath extension here!
+// Name your QuPath extension here!
 rootProject.name = 'BasicStitching'
 
-// TODO: Define the QuPath version compatible with the extension
+// Define the QuPath version compatible with the extension
 // Note that the QuPath API isn't stable; something designed for
 // 0.X.a should work with 0.X.b, but not necessarily with 0.Y.a.
 gradle.ext.qupathVersion = "0.4.4"
@@ -36,6 +36,9 @@ dependencyResolutionManagement {
 
         maven {
             url "https://maven.scijava.org/content/repositories/snapshots"
+        }
+        maven {
+            url "https://maven.scijava.org/content/groups/public"
         }
 
     }
