@@ -7,13 +7,16 @@ plugins {
   id 'com.github.johnrengelman.shadow' version '7.1.2'
   // Include this plugin to avoid downloading JavaCPP dependencies for all platforms
   id 'org.bytedeco.gradle-javacpp-platform'
+  // So that we can install the project into the local Maven repository cache,
+  // so that it can be depended upon by other local projects.
+  id 'maven-publish'
 }
 
 // TODO: Change the module name
 ext.moduleName = 'io.github.qupath.extension.BasicStitchingExtension'
-
+group = 'qupath.ext.basicstitching'
 // TODO: Define the extension version & provide a short description
-version = "0.4.4"
+version = "0.1.0"
 description = 'A basic QuPath extension for stitching.'
 
 // TODO: Specify the QuPath version, compatible with the extension.
@@ -143,12 +146,17 @@ repositories {
     mavenCentral()
 
     // Add scijava - which is where QuPath's jars are hosted
+    // Needed for ome:formats-gpl dependency.
     maven {
-        url "https://maven.scijava.org/content/repositories/releases"
+        url "https://maven.scijava.org/content/groups/public"
     }
 
-    maven {
-        url "https://maven.scijava.org/content/repositories/snapshots"
-    }
+}
 
+publishing {
+    publications {
+        myLibrary(MavenPublication) {
+            from components.java
+        }
+    }
 }
