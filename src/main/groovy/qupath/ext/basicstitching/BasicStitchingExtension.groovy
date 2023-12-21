@@ -8,13 +8,10 @@ import qupath.lib.gui.extensions.QuPathExtension;
 
 
 /**
- * This is a demo to provide a template for creating a new QuPath extension in Groovy.
- * <p>
- * <b>Important!</b> For your extension to work in QuPath, you need to make sure the name & package
- * of this class is consistent with the file
- * <pre>
- *     /resources/META-INF/services/qupath.lib.gui.extensions.QuPathExtension
- * </pre>
+  TODO: create public functions so that stitching can be run from command line or a script
+  CHECK: Always build AND publish to maven local
+ ./gradlew publishToMavenLocal
+
  */
 class BasicStitchingExtension implements QuPathExtension {
 

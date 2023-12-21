@@ -4,32 +4,68 @@ import org.slf4j.LoggerFactory
 import qupath.lib.gui.QuPathGUI
 import qupath.lib.images.writers.ome.OMEPyramidWriter
 import javax.imageio.ImageIO
-
-
+import java.lang.reflect.Modifier
+import java.nio.file.Path
+import java.nio.file.Paths
+import java.nio.file.Files
 
 /**
  * Class containing utility functions used throughout the application.
  */
 class UtilityFunctions {
+    static ArrayList<String> getCompressionTypeList() {
+        def compressionTypeClass = OMEPyramidWriter.CompressionType
 
+// Retrieve all declared fields in the class
+        def fields = compressionTypeClass.declaredFields
+
+// Filter only public static final fields
+        def compressionTypes = fields.findAll {
+            Modifier.isPublic(it.modifiers) &&
+                    Modifier.isStatic(it.modifiers) &&
+                    Modifier.isFinal(it.modifiers)
+        }
+
+// Extract the names of the fields
+        def compressionTypeNames = compressionTypes*.name
+        return compressionTypeNames
+    }
     /**
      * Gets the compression type for OMEPyramidWriter based on the selected option.
      *
      * @param selectedOption The selected compression option as a string.
      * @return The corresponding OMEPyramidWriter.CompressionType.
+     * @throws IllegalArgumentException if the selected option does not match any compression type.
      */
-    static OMEPyramidWriter.CompressionType getCompressionType(String selectedOption) {
-        switch (selectedOption) {
-            case "Lossy compression JPEG2000":
-                return OMEPyramidWriter.CompressionType.J2K_LOSSY
-            case "Lossless compression JPEG2000":
-                return OMEPyramidWriter.CompressionType.J2K
-            default:
-                // Default to lossless J2K if something goes wrong
-                return OMEPyramidWriter.CompressionType.J2K
+    static OMEPyramidWriter.CompressionType getCompressionType(String selectedOption) throws IllegalArgumentException {
+        try {
+            // Convert the string to an enum constant
+            return OMEPyramidWriter.CompressionType.valueOf(selectedOption);
+        } catch (IllegalArgumentException e) {
+            // Throw an exception if no matching compression type is found
+            throw new IllegalArgumentException("Invalid compression type: " + selectedOption);
         }
     }
+/**
+ * Generates a unique file path by appending a number if the file already exists.
+ *
+ * @param originalPath The original file path.
+ * @return A unique file path.
+ */
+    static String getUniqueFilePath(String originalPath) {
+        Path path = Paths.get(originalPath)
+        String baseName = path.getFileName().toString().replaceAll(/\.ome\.tif$/, "")
+        Path parentDir = path.getParent()
 
+        int counter = 1
+        while (Files.exists(path)) {
+            String newFileName = "${baseName}_${counter}.ome.tif"
+            path = parentDir.resolve(newFileName)
+            counter++
+        }
+
+        return path.toString()
+    }
     /**
      * Retrieves the dimensions (width and height) of a TIFF image file.
      *

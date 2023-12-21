@@ -6,7 +6,7 @@ package qupath.ext.basicstitching.functions
 
 import javafx.scene.Node
 import qupath.ext.basicstitching.stitching.stitchingImplementations
-
+import qupath.ext.basicstitching.utilities.UtilityFunctions
 import javafx.scene.control.*
 import javafx.scene.layout.GridPane
 import javafx.stage.Modality
@@ -18,6 +18,8 @@ import java.awt.Desktop;
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+
+import static qupath.ext.basicstitching.utilities.UtilityFunctions.getCompressionTypeList
 
 class StitchingGUI {
 
@@ -70,7 +72,7 @@ class StitchingGUI {
             String matchingString = matchStringField.getText() // Assuming matchStringField is accessible
             String stitchingType = stitchingGridBox.getValue()
             // Call the function with collected data
-            stitchingImplementations.stitchCore(stitchingType, folderPath, compressionType, pixelSize, downsample, matchingString)
+            stitchingImplementations.stitchCore(stitchingType, folderPath, folderPath, compressionType, pixelSize, downsample, matchingString)
             //stitchByFileName(folderPath, compressionType, pixelSize, downsample, matchingString)
         }
 
@@ -288,7 +290,7 @@ class StitchingGUI {
         }
     }
 
-
+//TODO populate with a list of compression types
 /**
  * Adds compression selection components to the specified GridPane.
  * This method configures a combo box with options for different types of image compression
@@ -299,11 +301,12 @@ class StitchingGUI {
  */
     private static void addCompressionComponents(GridPane pane) {
         // Clear any existing items and add new compression options to the combo box
+        def compressionTypes = getCompressionTypeList()
         compressionBox.getItems().clear();
-        compressionBox.getItems().addAll("Lossy compression JPEG2000", "Lossless compression JPEG2000");
+        compressionBox.getItems().addAll(compressionTypes);
 
         // Set the default value for the combo box
-        compressionBox.setValue("Lossless compression");
+        compressionBox.setValue("J2K_LOSSY");
 
         // Create and set a tooltip for additional information
         Tooltip compressionTooltip = new Tooltip("Select the type of image compression.");

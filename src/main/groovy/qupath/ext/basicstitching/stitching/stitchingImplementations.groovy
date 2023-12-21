@@ -554,7 +554,7 @@ class stitchingImplementations {
      * @param baseDownsample The base downsample value for the stitching process.
      * @param matchingString A string to match for selecting relevant subdirectories or files.
      */
-    static void stitchCore(String stitchingType, String folderPath, String compressionType, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
+    static void stitchCore(String stitchingType, String folderPath, String outputPath, String compressionType, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
         def logger = LoggerFactory.getLogger(QuPathGUI.class)
         // Determine the stitching strategy based on the provided type
         switch(stitchingType) {
@@ -617,14 +617,15 @@ class stitchingImplementations {
 
             // Write the final stitched image
             long startTime = System.currentTimeMillis()
-            def filename = subdirName ? subdirName : Paths.get(folderPath).getFileName().toString()
-            def outputPath = baseDownsample == 1 ?
-                    Paths.get(folderPath).resolve(filename + '.ome.tif') :
-                    Paths.get(folderPath).resolve(filename + '_' + (int) baseDownsample + 'x_downsample.ome.tif')
+            def filename = subdirName ?: Paths.get(folderPath).getFileName().toString()
+            def outputFilePath = baseDownsample == 1 ?
+                    Paths.get(outputPath).resolve(filename + '.ome.tif') :
+                    Paths.get(outputPath).resolve(filename + '_' + (int) baseDownsample + 'x_downsample.ome.tif')
 
-            def fileOutput = outputPath.toFile()
-            String pathOutput = fileOutput.getAbsolutePath()
-
+            //def fileOutput = outputFilePath.toFile()
+            //String pathOutput = fileOutput.getAbsolutePath()
+            String pathOutput = outputFilePath.toAbsolutePath().toString()
+            pathOutput = UtilityFunctions.getUniqueFilePath(pathOutput)
             new OMEPyramidWriter.Builder(server)
                     .tileSize(512)
                     .channelsInterleaved()
