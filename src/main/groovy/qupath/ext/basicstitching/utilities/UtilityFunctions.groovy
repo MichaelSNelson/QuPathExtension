@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.Files
+import java.util.stream.Stream
 
 /**
  * Class containing utility functions used throughout the application.
@@ -47,25 +48,31 @@ class UtilityFunctions {
         }
     }
 /**
- * Generates a unique file path by appending a number if the file already exists.
+ * Generates a unique file path by appending a number to the file name if a file with the
+ * same name already exists. The first instance of the file will have no number appended,
+ * while the second will have _2, the third _3, and so on.
  *
  * @param originalPath The original file path.
  * @return A unique file path.
  */
     static String getUniqueFilePath(String originalPath) {
-        Path path = Paths.get(originalPath)
-        String baseName = path.getFileName().toString().replaceAll(/\.ome\.tif$/, "")
-        Path parentDir = path.getParent()
+        Path path = Paths.get(originalPath);
+        String baseName = path.getFileName().toString().replaceAll('\\.ome\\.tif$', "");
+        Path parentDir = path.getParent();
 
-        int counter = 1
-        while (Files.exists(path)) {
-            String newFileName = "${baseName}_${counter}.ome.tif"
-            path = parentDir.resolve(newFileName)
-            counter++
+        // Start with the original base name
+        Path newPath = parentDir.resolve(baseName + ".ome.tif");
+        int counter = 2;
+
+        // If the file exists, start appending numbers
+        while (Files.exists(newPath)) {
+            newPath = parentDir.resolve(baseName + "_" + counter + ".ome.tif");
+            counter++;
         }
 
-        return path.toString()
+        return newPath.toString();
     }
+
     /**
      * Retrieves the dimensions (width and height) of a TIFF image file.
      *

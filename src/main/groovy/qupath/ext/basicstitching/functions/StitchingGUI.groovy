@@ -72,7 +72,7 @@ class StitchingGUI {
             String matchingString = matchStringField.getText() // Assuming matchStringField is accessible
             String stitchingType = stitchingGridBox.getValue()
             // Call the function with collected data
-            stitchingImplementations.stitchCore(stitchingType, folderPath, folderPath, compressionType, pixelSize, downsample, matchingString)
+            String finalImageName = stitchingImplementations.stitchCore(stitchingType, folderPath, folderPath, compressionType, pixelSize, downsample, matchingString)
             //stitchByFileName(folderPath, compressionType, pixelSize, downsample, matchingString)
         }
 

@@ -554,7 +554,7 @@ class stitchingImplementations {
      * @param baseDownsample The base downsample value for the stitching process.
      * @param matchingString A string to match for selecting relevant subdirectories or files.
      */
-    static void stitchCore(String stitchingType, String folderPath, String outputPath, String compressionType, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
+    static String stitchCore(String stitchingType, String folderPath, String outputPath, String compressionType, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
         def logger = LoggerFactory.getLogger(QuPathGUI.class)
         // Determine the stitching strategy based on the provided type
         switch(stitchingType) {
@@ -636,8 +636,9 @@ class stitchingImplementations {
                     .writePyramid(pathOutput)
 
             long endTime = System.currentTimeMillis()
-            println("Image written to ${pathOutput} in ${GeneralTools.formatNumber((endTime - startTime)/1000.0, 1)} s")
+            logger.info("Image written to ${pathOutput} in ${GeneralTools.formatNumber((endTime - startTime)/1000.0, 1)} s")
             server.close()
+            return pathOutput
         } else {
             println("No valid stitching strategy set.")
         }
