@@ -5,19 +5,16 @@
 package qupath.ext.basicstitching.functions
 
 import javafx.scene.Node
-import qupath.ext.basicstitching.stitching.stitchingImplementations
-import qupath.ext.basicstitching.utilities.UtilityFunctions
 import javafx.scene.control.*
 import javafx.scene.layout.GridPane
-import javafx.stage.Modality
 import javafx.stage.DirectoryChooser
-import qupath.lib.gui.scripting.QPEx
-
-import java.awt.Desktop;
-
-
+import javafx.stage.Modality
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import qupath.ext.basicstitching.stitching.stitchingImplementations
+import qupath.lib.gui.scripting.QPEx
+
+import java.awt.*
 
 import static qupath.ext.basicstitching.utilities.UtilityFunctions.getCompressionTypeList
 
@@ -66,8 +63,10 @@ class StitchingGUI {
             String compressionType = compressionBox.getValue() // Assuming compressionBox is accessible
 
             // Check if pixelSizeField and downsampleField are not empty
-            double pixelSize = pixelSizeField.getText() ? Double.parseDouble(pixelSizeField.getText()) : 0 // Default to 0 if empty
-            double downsample = downsampleField.getText() ? Double.parseDouble(downsampleField.getText()) : 1 // Default to 1 if empty
+            double pixelSize = pixelSizeField.getText() ? Double.parseDouble(pixelSizeField.getText()) : 0
+            // Default to 0 if empty
+            double downsample = downsampleField.getText() ? Double.parseDouble(downsampleField.getText()) : 1
+            // Default to 1 if empty
 
             String matchingString = matchStringField.getText() // Assuming matchStringField is accessible
             String stitchingType = stitchingGridBox.getValue()
@@ -122,8 +121,8 @@ class StitchingGUI {
  * row index for the label and control in the grid. If the row index is
  * not found, an error is logged.
  *
- * @param pane   The GridPane to which the label and control are added.
- * @param label  The label to be added to the grid.
+ * @param pane The GridPane to which the label and control are added.
+ * @param label The label to be added to the grid.
  * @param control The control (e.g., TextField, ComboBox) associated with the label.
  */
     private static void addToGrid(GridPane pane, Node label, Node control) {
@@ -183,17 +182,18 @@ class StitchingGUI {
         // Dynamically assign row positions to each GUI element.
         // The order of these statements dictates their vertical order in the GridPane.
 
-        guiElementPositions.put(stitchingGridLabel, currentPosition++); // Position for stitching grid label and combo box
+        guiElementPositions.put(stitchingGridLabel, currentPosition++);
+        // Position for stitching grid label and combo box
         guiElementPositions.put(folderLabel, currentPosition++);         // Position for folder label and text field
         guiElementPositions.put(compressionLabel, currentPosition++);   // Position for compression label and combo box
         guiElementPositions.put(pixelSizeLabel, currentPosition++);     // Position for pixel size label and text field
         guiElementPositions.put(downsampleLabel, currentPosition++);    // Position for downsample label and text field
-        guiElementPositions.put(matchStringLabel, currentPosition++);   // Position for matching string label and text field
+        guiElementPositions.put(matchStringLabel, currentPosition++);
+        // Position for matching string label and text field
         guiElementPositions.put(githubLink, currentPosition++);         // Position for the GitHub hyperlink
 
         // More components can be added here following the same pattern.
     }
-
 
 
 /**
@@ -213,7 +213,7 @@ class StitchingGUI {
         stitchingGridBox.getItems().addAll(
                 "Vectra tiles with metadata",
                 "Filename[x,y] with coordinates in microns",
-                "Coordinates in TileCoordinates.txt file"
+                "Coordinates in TileConfiguration.txt file"
         );
 
         // Set the default value for the combo box

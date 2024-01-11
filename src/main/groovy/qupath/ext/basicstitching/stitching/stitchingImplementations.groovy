@@ -1,25 +1,25 @@
 package qupath.ext.basicstitching.stitching
 
+import org.slf4j.LoggerFactory
+import qupath.ext.basicstitching.utilities.UtilityFunctions
 import qupath.lib.common.GeneralTools
+import qupath.lib.gui.QuPathGUI
 import qupath.lib.gui.dialogs.Dialogs
 import qupath.lib.images.servers.ImageServerProvider
 import qupath.lib.images.servers.ImageServers
 import qupath.lib.images.servers.SparseImageServer
 import qupath.lib.images.writers.ome.OMEPyramidWriter
 import qupath.lib.regions.ImageRegion
-import qupath.lib.gui.QuPathGUI
 
-import java.awt.image.BufferedImage
-import static qupath.lib.gui.scripting.QPEx.*
-import qupath.ext.basicstitching.utilities.UtilityFunctions
-import java.nio.file.Path
-import java.nio.file.Files
-import java.nio.file.Paths
+import javax.imageio.ImageIO
 import javax.imageio.plugins.tiff.BaselineTIFFTagSet
 import javax.imageio.plugins.tiff.TIFFDirectory
-import javax.imageio.ImageIO
+import java.awt.image.BufferedImage
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
-import org.slf4j.LoggerFactory;
+import static qupath.lib.scripting.QP.getLogger;
 
 //TODO Is there a way to apply the downsample when accessing the image regions so the full res image region doesn't need to be stored in memory?
 // Maybe downsample after acquiring the region as a second step?
@@ -331,7 +331,7 @@ class TileConfigurationTxtStrategy implements StitchingStrategy {
             int y = config.y as int
             def dimensions = UtilityFunctions.getTiffDimensions(file)
             if (dimensions == null) {
-                logger.info(  "Could not retrieve dimensions for image $imageName")
+                logger.info("Could not retrieve dimensions for image $imageName")
                 return null
             }
             int width = dimensions.width
@@ -339,7 +339,7 @@ class TileConfigurationTxtStrategy implements StitchingStrategy {
             //logger.info( x+" "+y+" "+ width+ " " + height)
             return ImageRegion.createInstance(x, y, width, height, z, t)
         } else {
-            logger.info(  "No configuration found for image $imageName")
+            logger.info("No configuration found for image $imageName")
             return null
         }
     }
@@ -521,10 +521,9 @@ class VectraMetadataStrategy implements StitchingStrategy {
      */
     static double getRational(TIFFDirectory tiffDir, int tag) {
         long[] rational = tiffDir.getTIFFField(tag).getAsRational(0)
-        return rational[0] / (double)rational[1]
+        return rational[0] / (double) rational[1]
     }
 }
-
 
 
 /**
@@ -557,14 +556,16 @@ class stitchingImplementations {
     static String stitchCore(String stitchingType, String folderPath, String outputPath, String compressionType, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
         def logger = LoggerFactory.getLogger(QuPathGUI.class)
         // Determine the stitching strategy based on the provided type
-        switch(stitchingType) {
+        logger.info("Stitching typoe is: $stitchingType")
+        switch (stitchingType) {
+
             case "Filename[x,y] with coordinates in microns":
                 setStitchingStrategy(new FileNameStitchingStrategy())
                 break
             case "Vectra tiles with metadata":
                 setStitchingStrategy(new VectraMetadataStrategy())
                 break
-            case "Coordinates in TileCoordinates.txt file":
+            case "Coordinates in TileConfiguration.txt file":
                 setStitchingStrategy(new TileConfigurationTxtStrategy())
                 break
             default:
@@ -573,7 +574,7 @@ class stitchingImplementations {
         }
 
         // Proceed with the stitching process if a valid strategy is set
-        if(strategy) {
+        if (strategy) {
             // Prepare stitching by processing the folder with the selected strategy
             def fileRegionPairs = strategy.prepareStitching(folderPath, pixelSizeInMicrons, baseDownsample, matchingString)
             OMEPyramidWriter.CompressionType compression = UtilityFunctions.getCompressionType(compressionType)
@@ -636,7 +637,7 @@ class stitchingImplementations {
                     .writePyramid(pathOutput)
 
             long endTime = System.currentTimeMillis()
-            logger.info("Image written to ${pathOutput} in ${GeneralTools.formatNumber((endTime - startTime)/1000.0, 1)} s")
+            logger.info("Image written to ${pathOutput} in ${GeneralTools.formatNumber((endTime - startTime) / 1000.0, 1)} s")
             server.close()
             return pathOutput
         } else {

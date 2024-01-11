@@ -3,12 +3,12 @@ package qupath.ext.basicstitching.utilities
 import org.slf4j.LoggerFactory
 import qupath.lib.gui.QuPathGUI
 import qupath.lib.images.writers.ome.OMEPyramidWriter
+
 import javax.imageio.ImageIO
 import java.lang.reflect.Modifier
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.nio.file.Files
-import java.util.stream.Stream
 
 /**
  * Class containing utility functions used throughout the application.
@@ -106,7 +106,7 @@ class UtilityFunctions {
     }
 }
 
-    //TODO Move this somewhere
+//TODO Move this somewhere
 //    List<Map> prepareStitching(String folderPath, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
 //        def logger = LoggerFactory.getLogger(QuPathGUI.class)
 //        Path rootdir = Paths.get(folderPath)
