@@ -530,7 +530,7 @@ class VectraMetadataStrategy implements StitchingStrategy {
  * Class responsible for managing stitching strategies and executing the stitching process.
  * This class sets the appropriate stitching strategy based on the given type and coordinates the stitching process.
  */
-class stitchingImplementations {
+class StitchingImplementations {
     private static StitchingStrategy strategy
 
     /**
@@ -539,7 +539,7 @@ class stitchingImplementations {
      * @param strategy The stitching strategy to be set.
      */
     static void setStitchingStrategy(StitchingStrategy strategy) {
-        stitchingImplementations.strategy = strategy
+        StitchingImplementations.strategy = strategy
     }
 
     /**
@@ -553,10 +553,12 @@ class stitchingImplementations {
      * @param baseDownsample The base downsample value for the stitching process.
      * @param matchingString A string to match for selecting relevant subdirectories or files.
      */
-    static String stitchCore(String stitchingType, String folderPath, String outputPath, String compressionType, double pixelSizeInMicrons, double baseDownsample, String matchingString) {
+    static String stitchCore(String stitchingType, String folderPath, String outputPath,
+                             String compressionType, double pixelSizeInMicrons,
+                             double baseDownsample, String matchingString) {
         def logger = LoggerFactory.getLogger(QuPathGUI.class)
         // Determine the stitching strategy based on the provided type
-        logger.info("Stitching typoe is: $stitchingType")
+        logger.info("Stitching type is: $stitchingType")
         switch (stitchingType) {
 
             case "Filename[x,y] with coordinates in microns":
@@ -569,7 +571,7 @@ class stitchingImplementations {
                 setStitchingStrategy(new TileConfigurationTxtStrategy())
                 break
             default:
-                Dialogs.showWarningNotification("Warning", "Error with choosing a stitching method, code here should not be reached in stitchingImplementations.groovy")
+                Dialogs.showWarningNotification("Warning", "Error with choosing a stitching method, code here should not be reached in StitchingImplementations.groovy")
                 return // Safely exit the method if the stitching type is not recognized
         }
 

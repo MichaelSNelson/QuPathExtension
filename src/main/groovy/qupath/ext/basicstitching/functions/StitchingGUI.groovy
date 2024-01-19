@@ -11,7 +11,7 @@ import javafx.stage.DirectoryChooser
 import javafx.stage.Modality
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import qupath.ext.basicstitching.stitching.stitchingImplementations
+import qupath.ext.basicstitching.stitching.StitchingImplementations
 import qupath.lib.gui.scripting.QPEx
 
 import java.awt.*
@@ -71,7 +71,7 @@ class StitchingGUI {
             String matchingString = matchStringField.getText() // Assuming matchStringField is accessible
             String stitchingType = stitchingGridBox.getValue()
             // Call the function with collected data
-            String finalImageName = stitchingImplementations.stitchCore(stitchingType, folderPath, folderPath, compressionType, pixelSize, downsample, matchingString)
+            String finalImageName = StitchingImplementations.stitchCore(stitchingType, folderPath, folderPath, compressionType, pixelSize, downsample, matchingString)
             //stitchByFileName(folderPath, compressionType, pixelSize, downsample, matchingString)
         }
 
